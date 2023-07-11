@@ -43,6 +43,30 @@ const gisLoaded = () => {
   gisInited = true;
 };
 
+export const searchFile = async (words: string): Promise<any> => {
+  return new Promise(async (resolve, reject) => {
+    gapi.client.drive.files
+      .list({
+        corpora: "user",
+        q: `name contains '${words}' and (mimeType = 'application/pdf' or mimeType = 'image/png' or mimeType = 'image/jpeg' or mimeType = 'image/webp' or mimeType = 'image/gif' or mimeType = 'application/vnd.google-apps.folder' or mimeType = 'application/vnd.google-apps.document' or mimeType = 'application/vnd.google-apps.drawing' or mimeType = 'application/vnd.google-apps.presentation' or mimeType = 'application/vnd.google-apps.spreadsheet' or mimeType = 'application/vnd.google-apps.jam') and trashed = false`,
+        fields: `nextPageToken,files(id,name,size,mimeType,thumbnailLink,trashed,imageMediaMetadata,owners,modifiedTime,sharedWithMeTime)`,
+        pageSize: 40,
+        supportsAllDrives: true,
+        includeItemsFromAllDrives: true,
+      })
+      .then(async (res: { result: any }) => {
+        resolve({
+          data: res.result,
+        });
+      })
+      .catch((err: any) => {
+        reject({
+          data: [],
+        });
+      });
+  });
+};
+
 export const listFiles = async (type: string, folderId?: string): Promise<any> => {
   return new Promise(async (resolve, reject) => {
     const param = {
@@ -118,5 +142,28 @@ export default class googleDrive {
   static async listFiles(type: string, folderId?: string) {
     const { data } = await listFiles(type, folderId);
     return data;
+  }
+
+
+  static async searchFiles(words: string): Promise<any> {
+    if (!gapiInited || !gisInited) {
+      throw new Error("初始化失败");
+    }
+    console.log(gapiInited, gisInited);
+    return new Promise((resolve) => {
+      if (gapi.client.getToken() === null) {
+        tokenClient.requestAccessToken({ prompt: "consent" });
+      } else {
+        tokenClient.requestAccessToken({ prompt: "" });
+      }
+      tokenClient.callback = async (resp: any) => {
+        if (resp.error !== undefined) {
+          throw resp;
+        }
+
+        const { data } = await searchFile(words);
+        resolve(data);
+      };
+    });
   }
 }
