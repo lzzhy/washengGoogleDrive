@@ -1,3 +1,12 @@
+## config
+`生产环境：谷歌验证`：根目录文件index.html引入如下，用于google校验域名是否正确，是否能授权：
+```js
+<meta name="google-site-verification" content="0ZfhoaqTOvSYDPD6ucIfgTvXvPlzYOtdJQbWA2FZMRk" />
+```
+
+`本地开发：默认端口号为`：目前已配置可使用的端口号有：`http://localhost:8000`，`http://localhost:4200`
+
+>本地开发时，需要在google后台配置本地起的服务的端口号，不然访问不了
 ## Install
 
 ```
